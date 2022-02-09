@@ -33,10 +33,6 @@ func init() {
 	r, _ = regexp.Compile("^m(\\/[0-9]+'{0,1}){0,5}$")
 }
 
-func IsValid(s string) bool {
-	return r.MatchString(s)
-}
-
 func Parse(s string) (*Bip32Path, error) {
 	if false == r.MatchString(s) {
 		return nil, errors.New("Path is invalid (1)")
