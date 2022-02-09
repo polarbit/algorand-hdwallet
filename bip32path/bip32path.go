@@ -18,11 +18,11 @@ type Bip32Path struct {
 	// Change       uint32
 	// AddressIndex uint32
 	// Depth        uint8
-	RawPath string
-	Parts   []*Bip32PathPart
+	RawPath  string
+	Segments []*Bip32PathSegment
 }
 
-type Bip32PathPart struct {
+type Bip32PathSegment struct {
 	Value      uint32
 	IsHardened bool
 }
@@ -38,41 +38,41 @@ func Parse(s string) (*Bip32Path, error) {
 		return nil, errors.New("Path is invalid (1)")
 	}
 
-	parts := strings.Split(s[1:], "/")
+	segments := strings.Split(s[1:], "/")
 
 	path := &Bip32Path{
-		RawPath: s,
-		Parts:   make([]*Bip32PathPart, 0),
+		RawPath:  s,
+		Segments: make([]*Bip32PathSegment, 0),
 	}
 
-	for i, p := range parts {
+	for i, s := range segments {
 		if i == 0 {
 			continue
 		}
 
-		newp := Bip32PathPart{}
-		path.Parts = append(path.Parts, &newp)
+		newseg := Bip32PathSegment{}
+		path.Segments = append(path.Segments, &newseg)
 
-		if p[len(p)-1] == byte('\'') {
-			val, err := strconv.ParseUint(p[:len(p)-1], 10, 32)
+		if s[len(s)-1] == byte('\'') {
+			val, err := strconv.ParseUint(s[:len(s)-1], 10, 32)
 			if err != nil {
 				return nil, errors.New("Path is invalid (2)")
 			}
-			newp.Value = uint32(val)
-			newp.IsHardened = true
+			newseg.Value = uint32(val)
+			newseg.IsHardened = true
 		} else {
-			val, err := strconv.ParseUint(p, 10, 32)
+			val, err := strconv.ParseUint(s, 10, 32)
 			if err != nil {
 				return nil, errors.New("Path is invalid (3)")
 			}
-			newp.Value = uint32(val)
+			newseg.Value = uint32(val)
 		}
 
-		if newp.Value > 0 && p[0] == byte('0') {
+		if newseg.Value > 0 && s[0] == byte('0') {
 			return nil, errors.New("Path is invalid (4)")
 		}
 
-		if newp.Value >= HARDENED_OFFSET {
+		if newseg.Value >= HARDENED_OFFSET {
 			return nil, errors.New("Path is invalid (5)")
 		}
 	}
