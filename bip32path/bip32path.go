@@ -23,6 +23,7 @@ type Bip32Path struct {
 }
 
 type Bip32PathSegment struct {
+	ValueSeen  uint32
 	Value      uint32
 	IsHardened bool
 }
@@ -58,21 +59,23 @@ func Parse(s string) (*Bip32Path, error) {
 			if err != nil {
 				return nil, errors.New("Path is invalid (2)")
 			}
-			newseg.Value = uint32(val)
+			newseg.ValueSeen = uint32(val)
+			newseg.Value = HARDENED_OFFSET + newseg.ValueSeen
 			newseg.IsHardened = true
 		} else {
 			val, err := strconv.ParseUint(s, 10, 32)
 			if err != nil {
 				return nil, errors.New("Path is invalid (3)")
 			}
-			newseg.Value = uint32(val)
+			newseg.ValueSeen = uint32(val)
+			newseg.Value = newseg.ValueSeen
 		}
 
-		if newseg.Value > 0 && s[0] == byte('0') {
+		if newseg.ValueSeen > 0 && s[0] == byte('0') {
 			return nil, errors.New("Path is invalid (4)")
 		}
 
-		if newseg.Value >= HARDENED_OFFSET {
+		if newseg.ValueSeen >= HARDENED_OFFSET {
 			return nil, errors.New("Path is invalid (5)")
 		}
 	}
