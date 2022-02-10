@@ -36,30 +36,30 @@ func TestParseSucceeds(t *testing.T) {
 		bip32Path *Bip32Path
 	}{
 		{
-			rawPath: "m",
-			bip32Path: &Bip32Path{
+			"m",
+			&Bip32Path{
 				Segments: nil,
 			},
 		},
 		{
-			rawPath: "m/0'",
-			bip32Path: &Bip32Path{
+			"m/0'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: true},
 				},
 			},
 		},
 		{
-			rawPath: "m/1",
-			bip32Path: &Bip32Path{
+			"m/1",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 1, IsHardened: false},
 				},
 			},
 		},
 		{
-			rawPath: "m/0'/1'",
-			bip32Path: &Bip32Path{
+			"m/0'/1'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: true},
 					{ValueSeen: 1, IsHardened: true},
@@ -67,8 +67,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0'/1'/2'",
-			bip32Path: &Bip32Path{
+			"m/0'/1'/2'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: true},
 					{ValueSeen: 1, IsHardened: true},
@@ -77,8 +77,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0'/1'/2'/2'",
-			bip32Path: &Bip32Path{
+			"m/0'/1'/2'/2'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: true},
 					{ValueSeen: 1, IsHardened: true},
@@ -88,8 +88,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0'/1'/2'/2'/1000000000'",
-			bip32Path: &Bip32Path{
+			"m/0'/1'/2'/2'/1000000000'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: true},
 					{ValueSeen: 1, IsHardened: true},
@@ -100,16 +100,16 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0",
-			bip32Path: &Bip32Path{
+			"m/0",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: false},
 				},
 			},
 		},
 		{
-			rawPath: "m/0/2147483647'",
-			bip32Path: &Bip32Path{
+			"m/0/2147483647'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: false},
 					{ValueSeen: 2147483647, IsHardened: true},
@@ -117,8 +117,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0/2147483647'/1",
-			bip32Path: &Bip32Path{
+			"m/0/2147483647'/1",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: false},
 					{ValueSeen: 2147483647, IsHardened: true},
@@ -127,8 +127,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0/2147483647'/1/2147483646'",
-			bip32Path: &Bip32Path{
+			"m/0/2147483647'/1/2147483646'",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: false},
 					{ValueSeen: 2147483647, IsHardened: true},
@@ -138,8 +138,8 @@ func TestParseSucceeds(t *testing.T) {
 			},
 		},
 		{
-			rawPath: "m/0/2147483647'/1/2147483646'/2",
-			bip32Path: &Bip32Path{
+			"m/0/2147483647'/1/2147483646'/2",
+			&Bip32Path{
 				Segments: []*Bip32PathSegment{
 					{ValueSeen: 0, IsHardened: false},
 					{ValueSeen: 2147483647, IsHardened: true},
