@@ -1,4 +1,4 @@
 # hdwallet
 
 * Go HDWallet bip32/slip-0010 impletementation
-* Only ed25519 implemented
+* Only Algorand / ed25519 implemented. (25 words mnemonic)
