@@ -1,4 +1,8 @@
 # hdwallet
 
 * Go HDWallet bip32/slip-0010 impletementation
-* Only Algorand / ed25519 implemented. (25 words mnemonic)
+* Only ed25519/ implemented
+
+
+Run single test: \
+`go test ./... -run "MnemonicToSeed" -v`

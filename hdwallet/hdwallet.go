@@ -5,9 +5,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/binary"
+	"errors"
 
 	"github.com/polarbit/algorand-hdwallet/bip32path"
 	"github.com/polarbit/algorand-hdwallet/utils"
+	"github.com/tyler-smith/go-bip39"
 )
 
 const (
@@ -95,4 +97,38 @@ func GetCurveKeyPair_Ed25519(key []byte) ([]byte, []byte, error) {
 	pubKey := append(make([]byte, 1), buf...)
 
 	return priv, pubKey, nil
+}
+
+func GenerateMasterKey(curve string, seed []byte) (xkey *ExtendedKey, err error) {
+	if len(seed) < 16 || len(seed) > 64 {
+		return nil, errors.New("Invalid  seed length")
+	}
+
+	if curve != CURVE_ED25519 {
+		panic("Curve not supported")
+	}
+
+	salt := []byte(curve)
+	hash := hmac.New(sha512.New, salt)
+	_, err = hash.Write(seed[:])
+	if err != nil {
+		return
+	}
+
+	I := hash.Sum(nil)
+
+	if curve != CURVE_ED25519 {
+		// TODO: Check invalid values for other curves (SECP256K1)
+		// If curve is not ed25519 and IL is 0 or ≥ n (invalid key)
+		// Set S := I and continue at step 2.
+		// Ref: BIP32
+	}
+
+	xkey, err = BuildExtendedKey(nil, I[:32], I[32:])
+
+	return
+}
+
+func MnemonicToSeed(mnemonic string) ([]byte, error) {
+	return bip39.NewSeedWithErrorChecking(mnemonic, "")
 }

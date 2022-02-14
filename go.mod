@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/algorand/go-algorand-sdk v1.12.0
 	github.com/stretchr/testify v1.7.0
+	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 )
 
