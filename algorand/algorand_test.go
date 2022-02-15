@@ -19,26 +19,26 @@ func TestGenerateMnemonic(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// TODO: Validate with signing
+
 	t.Logf("Mnemonic:\n%s", m)
 }
 
-func TestGetSeedFromMnemonic(t *testing.T) {
-	seed, err := GetSeedFromMnemonic(testDerivedMnemonic)
+func TestMnemonicToSeed(t *testing.T) {
+	seed, err := MnemonicToSeed(testDerivedMnemonic)
 	if err != nil {
 		t.Fatal(t)
 	}
 
 	assert.Equal(t, testDerivedSeedBytes, seed)
-
-	t.Logf("Seed:\n%v", seed)
 }
 
 func TestDeriveAccount(t *testing.T) {
 	for i := uint32(1); i <= 10; i++ {
 		t.Run(fmt.Sprintf("account-%v", i), func(t *testing.T) {
-			addr, mnemonic, err := DeriveAccount(testMnemonic, i)
+			addr, mnemonic, err := DeriveBasicAccount(testMnemonic, i)
 			if err != nil {
-				t.Fatal(err)
+				t.Error(err)
 			}
 
 			if i == 10 {
@@ -50,4 +50,20 @@ func TestDeriveAccount(t *testing.T) {
 			t.Logf("Mnemonic: %s", mnemonic)
 		})
 	}
+}
+
+func TestDeriveBip44(t *testing.T) {
+	a, m, xkey, err := DeriveHDWalletAccount(testDerivedMnemonic, "m/44'/283'/0'")
+	if err != nil {
+		t.Error(err)
+	}
+
+	mnemonic2, err := PrivateKeyToMnemomic(xkey.CurvePrivateKey)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, m, mnemonic2) // This workds because mnenomic is only generated from first half (32byte) of the given seed.
+
+	t.Logf("Address: %v", a)
+	t.Logf("Mnemonic: %v", m)
 }

@@ -13,63 +13,51 @@ import (
 )
 
 const (
-	CURVE_ED25519   = "ed25519 seed"
-	CURVE_SECP256K1 = "Bitcoin seed"
-	CURVE_NIST256P1 = "Nist256p1 seed"
+	CURVE_ED25519   string = "ed25519 seed"
+	CURVE_SECP256K1        = "Bitcoin seed"
+	CURVE_NIST256P1        = "Nist256p1 seed"
+	// CURVE_ED25519_N = big.NewInt(2 ^ 255 - 19)
 )
 
 type ExtendedKey struct {
-	Key         []byte
-	ChainCode   []byte
-	PrivateKey  []byte
-	PublicKey   []byte
-	Fingerprint []byte
-	ParentKey   *ExtendedKey
+	PrivateKey      []byte
+	ChainCode       []byte
+	CurvePrivateKey []byte
+	CurvePublicKey  []byte
+	PublicKey       []byte
+	Fingerprint     []byte
+	ParentKey       *ExtendedKey
 }
 
-func GenerateAccount(path *bip32path.Bip32Path, masterXKey *ExtendedKey) (xkey *ExtendedKey, err error) {
-	xkey = masterXKey
+func DeriveAccount(curve string, path *bip32path.Bip32Path, xmaster *ExtendedKey) (xchd *ExtendedKey, err error) {
+	if curve != CURVE_ED25519 {
+		return nil, errors.New("Only ed25519 is supported")
+	}
 
+	xchd = xmaster
 	for _, s := range path.Segments {
-		xkey, err = CKD(xkey, s.Value)
+		xchd, err = CKD(curve, xchd, s.Value)
 	}
 
 	return
 }
 
-func BuildExtendedKey(xparent *ExtendedKey, key []byte, chainCode []byte) (*ExtendedKey, error) {
-	priv, pub, err := GetCurveKeyPair_Ed25519(key)
-	if err != nil {
-		return nil, err
+func CKD(curve string, xpar *ExtendedKey, i uint32) (xchd *ExtendedKey, err error) {
+	if len(xpar.PrivateKey) != 32 {
+		panic("Invalid xparent.Key")
+	}
+	if len(xpar.ChainCode) != 32 {
+		panic("Ivalid xparent.ChainCode")
+	}
+	if i < bip32path.HARDENED_OFFSET {
+		return nil, errors.New("Only hardened keys are supported")
 	}
 
-	xkey := &ExtendedKey{
-		Key:        key,
-		ChainCode:  chainCode,
-		PrivateKey: priv,
-		PublicKey:  pub,
-		ParentKey:  xparent,
-	}
-
-	if xparent != nil {
-		keyId, err := utils.Hash160(xparent.PublicKey)
-		if err != nil {
-			return nil, err
-		}
-		xkey.Fingerprint = keyId[:4]
-	} else {
-		xkey.Fingerprint = []byte{0, 0, 0, 0}
-	}
-
-	return xkey, nil
-}
-
-func CKD(xparent *ExtendedKey, ix uint32) (xkey *ExtendedKey, err error) {
 	vbuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(vbuf, ix)
+	binary.BigEndian.PutUint32(vbuf, i)
 
-	key := xparent.Key
-	chainCode := xparent.ChainCode
+	key := xpar.PrivateKey
+	chainCode := xpar.ChainCode
 
 	buf := make([]byte, 1)
 	buf = append(buf, key...)
@@ -82,9 +70,38 @@ func CKD(xparent *ExtendedKey, ix uint32) (xkey *ExtendedKey, err error) {
 	}
 
 	I := hash.Sum(nil)
-	xkey, err = BuildExtendedKey(xparent, I[:32], I[32:])
+	xchd, err = ExtendKey(xpar, I[:32], I[32:])
 
 	return
+}
+
+func ExtendKey(xpar *ExtendedKey, key []byte, chainCode []byte) (*ExtendedKey, error) {
+	pub, priv, err := GetCurveKeyPair_Ed25519(key)
+	if err != nil {
+		return nil, err
+	}
+
+	xpub := append([]byte{0x00}, pub...) // Padding is reqired for ED25519 acc. to SLIP-0010
+	xkey := &ExtendedKey{
+		PrivateKey:      key,
+		ChainCode:       chainCode,
+		CurvePrivateKey: priv, // !!! Actually curve private key's first half [:32] and extended private key are equal for ED25519
+		CurvePublicKey:  pub,
+		PublicKey:       xpub,
+		ParentKey:       xpar,
+	}
+
+	if xpar != nil {
+		keyId, err := utils.Hash160(xpar.PublicKey)
+		if err != nil {
+			return nil, err
+		}
+		xkey.Fingerprint = keyId[:4]
+	} else {
+		xkey.Fingerprint = []byte{0, 0, 0, 0}
+	}
+
+	return xkey, nil
 }
 
 func GetCurveKeyPair_Ed25519(key []byte) ([]byte, []byte, error) {
@@ -94,16 +111,13 @@ func GetCurveKeyPair_Ed25519(key []byte) ([]byte, []byte, error) {
 	buf := make([]byte, 32)
 	copy(buf, pub.(ed25519.PublicKey))
 
-	pubKey := append(make([]byte, 1), buf...)
-
-	return priv, pubKey, nil
+	return buf, priv, nil
 }
 
-func GenerateMasterKey(curve string, seed []byte) (xkey *ExtendedKey, err error) {
+func GenerateMasterKey(curve string, seed []byte) (xmaster *ExtendedKey, err error) {
 	if len(seed) < 16 || len(seed) > 64 {
 		return nil, errors.New("Invalid  seed length")
 	}
-
 	if curve != CURVE_ED25519 {
 		panic("Curve not supported")
 	}
@@ -124,7 +138,7 @@ func GenerateMasterKey(curve string, seed []byte) (xkey *ExtendedKey, err error)
 		// Ref: BIP32
 	}
 
-	xkey, err = BuildExtendedKey(nil, I[:32], I[32:])
+	xmaster, err = ExtendKey(nil, I[:32], I[32:])
 
 	return
 }

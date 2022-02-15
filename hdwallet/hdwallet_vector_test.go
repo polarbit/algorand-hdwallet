@@ -125,7 +125,7 @@ func ed25519VectorTests(t *testing.T, seedHex string, testVectors []testVector) 
 
 	xmaster, err := GenerateMasterKey(CURVE_ED25519, seed)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	for i, v := range testVectors {
@@ -133,17 +133,18 @@ func ed25519VectorTests(t *testing.T, seedHex string, testVectors []testVector) 
 
 			path, err := bip32path.Parse(v.path)
 			if err != nil {
-				t.Fatal(err)
+				t.Error(err)
 			}
 
-			xkey, err := GenerateAccount(path, xmaster)
+			xkey, err := DeriveAccount(CURVE_ED25519, path, xmaster)
 			if err != nil {
-				t.Fatal(err)
+				t.Error(err)
 			}
 
 			assert.Equal(t, v.fingerprint, hex.EncodeToString(xkey.Fingerprint))
-			assert.Equal(t, v.private, hex.EncodeToString(xkey.Key))
+			assert.Equal(t, v.private, hex.EncodeToString(xkey.PrivateKey))
 			assert.Equal(t, v.public, hex.EncodeToString(xkey.PublicKey))
+			assert.Equal(t, xkey.PrivateKey, xkey.CurvePrivateKey[:32])
 		})
 	}
 }

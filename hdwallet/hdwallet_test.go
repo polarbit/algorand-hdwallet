@@ -15,7 +15,7 @@ func TestFromMnemonicToSeed(t *testing.T) {
 
 	seed, err := MnemonicToSeed(mnemonic)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	assert.Equal(t, expectedSeed, hex.EncodeToString(seed))
