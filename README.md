@@ -81,6 +81,8 @@ func RawTransactionBytesToSign(tx types.Transaction) []byte {
 
 Run single test: `go test ./... -run "MnemonicToSeed" -v`
 
+Run integration test: `TEST_INT=true go test ./... -run "AlgorandPayment" -v`
+
 ---
 
 ## References 
@@ -104,5 +106,5 @@ Run single test: `go test ./... -run "MnemonicToSeed" -v`
 - Refactor: logs, types ([]byte),  errors (better messages).
 - Add TX building, signing and broadcasting capability. (We already do this in payment integration test)
 - Import & export xpriv, and generate keys from it.
-- Use environment variables in integration tests.
+- Use environment variables in integration tests for mnemomics.
 - ... support other curves when Algorand is done. (maybe no or just ed25519 coins!)
