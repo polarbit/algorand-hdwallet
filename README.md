@@ -19,7 +19,7 @@ Also, basic **deterministic** key derivation from **25 words** mnemomic is imple
 
 ---
 
-## Implementation Notes
+## Notes
 
 ### PublicKey & Algorand Address
 *slip0010* creates extended public keys padded a zero byte (0x00) from left. \
@@ -36,6 +36,44 @@ Algorand-Sdk also uses the first half of that private key for mnemonics.
 
 [This](https://github.com/algorand/go-algorand/blob/04e69d4153d0e67d477d4d4b12faede7ec5331b1/daemon/kmd/wallet/driver/sqlite_crypto.go#L234) is the Algorand kmd code that generates deterministec wallets. I expect same derivations from same seed; but did not tested myself.
 
+### How transactions are signed by Algorand-SDK
+
+Below are two main/low-level methods that helps to understand low levels of Algorand tx signing.
+
+```go
+// rawSignTransaction signs the msgpack-encoded tx (with prepended "TX" prefix), and returns the sig and txid
+func rawSignTransaction(sk ed25519.PrivateKey, tx types.Transaction) (s types.Signature, txid string, err error) {
+	toBeSigned := rawTransactionBytesToSign(tx)
+
+	// Sign the encoded transaction
+	signature := ed25519.Sign(sk, toBeSigned)
+
+	// Copy the resulting signature into a Signature, 
+    // and check that it's the expected length
+	n := copy(s[:], signature)
+	if n != len(s) {
+		err = errInvalidSignatureReturned
+		return
+	}
+	// Populate txID
+	txid = txIDFromRawTxnBytesToSign(toBeSigned)
+	return
+}
+
+// rawTransactionBytesToSign returns the byte form of the tx that 
+// we actually sign and compute txID from.
+func RawTransactionBytesToSign(tx types.Transaction) []byte {
+	var txidPrefix = []byte("TX")
+
+	// Encode the transaction as msgpack
+	encodedTx := msgpack.Encode(tx)
+
+	// Prepend the hashable prefix
+	msgParts := [][]byte{txidPrefix, encodedTx}
+	return bytes.Join(msgParts, nil)
+}
+```
+[go-algorand/daemon/kmd/wallet/driver/sqlite_crypto.go](https://github.com/algorand/go-algorand-sdk/blob/f09c24dcd1866f04ee84da89e60d12495b388a9b/crypto/crypto.go#L97)
 
 ---
 
@@ -54,3 +92,17 @@ Run single test: `go test ./... -run "MnemonicToSeed" -v`
 [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)
 
 [Yieldly - Algorand Deterministic Account Derivation](https://github.com/yieldly-finance/yieldly-deterministic-account-generator)
+
+[Algorand Developer Docs - Offline Signing](https://developer.algorand.org/docs/get-details/transactions/offline_transactions/)
+
+[Algorand Go SDK - crypto.go](https://github.com/algorand/go-algorand-sdk/blob/develop/crypto/crypto.go)
+
+---
+
+## To Do
+
+- Refactor: logs, types ([]byte),  errors (better messages).
+- Add TX building, signing and broadcasting capability. (We already do this in payment integration test)
+- Import & export xpriv, and generate keys from it.
+- Use environment variables in integration tests.
+- ... support other curves when Algorand is done. (maybe no or just ed25519 coins!)
