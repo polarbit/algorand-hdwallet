@@ -10,20 +10,12 @@ Also, basic **deterministic** key derivation from **25 words** mnemomic is imple
 * Algorand coin code is **283** according to [slip-0044](https://github.com/satoshilabs/slips/blob/master/slip-0044.md). So derivation paths may be `m/44'/283'/0'/1'/100'` or simply `m/1'/0'/0'` (Not mandating any format...)
 * ed25519 test vectors 1 & 2 defined with SLIP-0010 are implemented. 
 
+---
 
-## How To
-Run single test: `go test ./... -run "MnemonicToSeed" -v`
+## Usage
 
 
-## References 
 
-[SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
-
-[BIP-32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki)
-
-[BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)
-
-[Yieldly - Algorand Deterministic Account Derivation](https://github.com/yieldly-finance/yieldly-deterministic-account-generator)
 
 ---
 
@@ -40,3 +32,25 @@ Second half of this private key is public key of the curve, `pub = priv[32:]` . 
 slip0010 uses the first half (32 byest) of that for key generation \
 Algorand-Sdk also uses the first half of that private key for mnemonics.
 
+### kmd - Deterministic Address Generation
+
+[This](https://github.com/algorand/go-algorand/blob/04e69d4153d0e67d477d4d4b12faede7ec5331b1/daemon/kmd/wallet/driver/sqlite_crypto.go#L234) is the Algorand kmd code that generates deterministec wallets. I expect same derivations from same seed; but did not tested myself.
+
+
+---
+
+## Tests
+
+Run single test: `go test ./... -run "MnemonicToSeed" -v`
+
+---
+
+## References 
+
+[SLIP-0010](https://github.com/satoshilabs/slips/blob/master/slip-0010.md)
+
+[BIP-32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki)
+
+[BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki)
+
+[Yieldly - Algorand Deterministic Account Derivation](https://github.com/yieldly-finance/yieldly-deterministic-account-generator)
