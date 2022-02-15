@@ -14,8 +14,22 @@ Also, basic **deterministic** key derivation from **25 words** mnemomic is imple
 
 ## Usage
 
+```go
+package main
 
+import (
+        "fmt"
+        "github.com/polarbit/hdwallet"
+)
 
+func main() {
+        mnemonic24 := "segment inhale symptom olive cheese tissue vacuum lazy sketch salt enroll wink oyster hen glory food weasel comic glow legal cute diet fun real"
+        path := "m/44'/283'/0'"
+        a, _, _ := hdwallet.DeriveAddressFromMnemonic(mnemonic24, path)
+
+        fmt.Printf("Address: %s\n", a)
+}
+```
 
 ---
 
