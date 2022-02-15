@@ -9,8 +9,6 @@ import (
 	"fmt"
 
 	"github.com/algorand/go-algorand-sdk/mnemonic"
-	"github.com/polarbit/algorand-hdwallet/bip32path"
-	"github.com/polarbit/algorand-hdwallet/hdwallet"
 	"golang.org/x/crypto/hkdf"
 )
 
@@ -55,46 +53,6 @@ func DeriveBasicAccount(mnemonic_ string, ix uint32) (string, string, error) {
 	}
 
 	return a, m, nil
-}
-
-func DeriveHDWalletAccount(mnemonic string, derivationPath string) (a string, m string, xkey *hdwallet.ExtendedKey, err error) {
-	path, err := bip32path.Parse(derivationPath)
-	if err != nil {
-		return
-	}
-
-	seed, err := MnemonicToSeed(mnemonic)
-	if err != nil {
-		return
-	}
-
-	xmaster, err := hdwallet.GenerateMasterKey(hdwallet.CURVE_ED25519, seed)
-	if err != nil {
-		return
-	}
-
-	xkey, err = hdwallet.DeriveAccount(hdwallet.CURVE_ED25519, path, xmaster)
-	if err != nil {
-		return
-	}
-
-	// !!! IMPORTANT !!!
-	// 'hdwallet' creates extended public keys padded with zero byte from left.
-	// But we need a 32 byte public key here; so we need the original one.
-	a, err = PublicKeyToAddress(xkey.CurvePublicKey)
-	if err != nil {
-		return
-	}
-
-	// We can also use xkey.CurvePrivateKey here;
-	// Because xkey.CurvePrivateKey[:32] == xkey.PrivateKey
-	// Also xkey.CurvePrivateKey[32:] == xkey.CurvePublicKey
-	m, err = PrivateKeyToMnemomic(xkey.PrivateKey)
-	if err != nil {
-		return
-	}
-
-	return
 }
 
 func PublicKeyToAddress(pub []byte) (string, error) {

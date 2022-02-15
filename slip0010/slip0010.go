@@ -1,4 +1,4 @@
-package hdwallet
+package slip0010
 
 import (
 	"crypto/ed25519"
@@ -7,8 +7,8 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/polarbit/algorand-hdwallet/bip32path"
-	"github.com/polarbit/algorand-hdwallet/utils"
+	"github.com/polarbit/hdwallet/bip32path"
+	"github.com/polarbit/hdwallet/utils"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -16,7 +16,6 @@ const (
 	CURVE_ED25519   string = "ed25519 seed"
 	CURVE_SECP256K1        = "Bitcoin seed"
 	CURVE_NIST256P1        = "Nist256p1 seed"
-	// CURVE_ED25519_N = big.NewInt(2 ^ 255 - 19)
 )
 
 type ExtendedKey struct {

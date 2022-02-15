@@ -12,12 +12,6 @@ const (
 )
 
 type Bip32Path struct {
-	// Purpose      uint32
-	// CoinType     uint32
-	// Account      uint32
-	// Change       uint32
-	// AddressIndex uint32
-	// Depth        uint8
 	RawPath  string
 	Segments []*Bip32PathSegment
 }

@@ -1,4 +1,4 @@
-module github.com/polarbit/algorand-hdwallet
+module github.com/polarbit/hdwallet
 
 go 1.17
 

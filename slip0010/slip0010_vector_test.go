@@ -1,11 +1,11 @@
-package hdwallet
+package slip0010
 
 import (
 	"encoding/hex"
 	"fmt"
 	"testing"
 
-	"github.com/polarbit/algorand-hdwallet/bip32path"
+	"github.com/polarbit/hdwallet/bip32path"
 	"github.com/stretchr/testify/assert"
 )
 

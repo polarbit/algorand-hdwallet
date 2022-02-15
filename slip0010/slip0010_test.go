@@ -1,4 +1,4 @@
-package hdwallet
+package slip0010
 
 import (
 	"encoding/hex"
@@ -6,8 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
-
-var ()
 
 func TestFromMnemonicToSeed(t *testing.T) {
 	mnemonic := "craft curve like tool damp voice jaguar sick fit immense pistol able omit define produce"
